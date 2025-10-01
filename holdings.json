@@ -1,0 +1,15 @@
+[
+  {
+    "symbol": "ASML.AS",
+    "status": "watch",
+    "baseline": 900.0,
+    "drop_pct": 10
+  },
+  {
+    "symbol": "AAPL",
+    "status": "owned",
+    "entry_price": 180.0,
+    "rise_pct": 5,
+    "shares": 10
+  }
+]

@@ -1,0 +1,11 @@
+{
+  "universes": [
+    {
+      "name": "AEX",
+      "file": "universes/aex.json",
+      "drop_pct": 10,
+      "baseline_mode": "prev_close",
+      "cooldown_minutes": 720
+    }
+  ]
+}
