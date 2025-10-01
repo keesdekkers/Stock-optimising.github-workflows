@@ -1,0 +1,51 @@
+.github/workflows/monitor.yml
+name: Stock Alerts
+
+on:schedule:
+    - cron: "*/10 * * * 1-5"   # elke 10 min, ma-vr (UTC)
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Ensure state/holdings exist
+        run: |
+          [ -f state.json ] || echo "{}" > state.json
+          [ -f holdings.json ] || echo "[]" > holdings.json
+
+      - name: Run monitor
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          DEFAULT_DROP_PCT: "10"
+          DEFAULT_RISE_PCT: "5"
+          COOLDOWN_MINUTES_WATCH: "720"
+          COOLDOWN_MINUTES_OWNED: "1440"
+        run: python main.py
+
+      - name: Commit changes (state/holdings)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if ! git diff --quiet state.json holdings.json; then
+            git add state.json holdings.json
+            git commit -m "chore: update state/holdings via Telegram [skip ci]"
+            git push
+          fi
